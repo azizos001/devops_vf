@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: stock-manager
+spec:
+  selector:
+    app: stock-manager
+  ports:
+  - port: 5002
+    targetPort: 5002
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stock-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stock-manager
+  template:
+    metadata:
+      labels:
+        app: stock-manager
+    spec:
+      containers:
+      - name: stock-manager
+        image: stoufaa/stock-manager:V8
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5002
+        env:
+        - name: MONGO_URI
+          value: "mongodb://mongodb:27017/ecommerce"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 5002
+          initialDelaySeconds: 5
+          periodSeconds: 10
